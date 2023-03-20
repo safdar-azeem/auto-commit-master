@@ -1,6 +1,6 @@
 # Auto Commit Master Extension
 
-The Auto Commit Master extension for Visual Studio Code automates the process of committing changes to Git repositories. Instead of manually committing each file, this extension automatically adds and commits files with appropriate commit messages.
+The Auto Commit Master extension for Visual Studio Code automates the process of committing changes to Git repositories. Instead of manually committing each file, this extension automatically adds and commits files with appropriate commit messages
 
 # Features
 
