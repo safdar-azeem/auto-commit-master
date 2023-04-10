@@ -30,3 +30,4 @@ The Auto Commit Master extension offers the following features:
 ### Stop button <img src="images/png/stop.png" alt="SVG Image" width="20" height="20">
 
 -  while the extension is running, you can click on the "Stop" icon button to stop the automatic commit process.
+
