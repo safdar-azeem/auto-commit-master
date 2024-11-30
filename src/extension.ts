@@ -92,6 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
    });
 
    context.subscriptions.push(start, stop);
+
    vscode.commands.executeCommand('setContext', 'autoCommitMaster.active', false);
 }
 
