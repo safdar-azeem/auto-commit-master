@@ -11,22 +11,27 @@ const addGitCommits = async (workingDirectory: string) => {
    const files = await getFiles();
    const { newFiles, modifiedFiles, deletedFiles } = files;
 
-   const allFiles = [
-      ...newFiles.map((file) => ({ file, action: 'Add' })),
-      ...modifiedFiles.map((file) => ({ file, action: 'Update' })),
-      ...deletedFiles.map((file) => ({ file, action: 'Delete' })),
-   ];
+   // Process deleted files first
+   for (const file of deletedFiles) {
+      if (stopFlag) return;
+      const message = generateCommitMessage(file, 'Delete');
+      await runGitCommand('git', ['rm', file]);
+      await runGitCommand('git', ['commit', '-m', message]);
+   }
 
-   for (const { file, action } of allFiles) {
-      if (stopFlag) {
-         return;
-      }
-      const message = generateCommitMessage(file, action);
-      if (action === 'Delete') {
-         await runGitCommand('git', ['rm', file]);
-      } else {
-         await runGitCommand('git', ['add', file]);
-      }
+   // Process modified files second
+   for (const file of modifiedFiles) {
+      if (stopFlag) return;
+      const message = generateCommitMessage(file, 'Update');
+      await runGitCommand('git', ['add', file]);
+      await runGitCommand('git', ['commit', '-m', message]);
+   }
+
+   // Process new files last
+   for (const file of newFiles) {
+      if (stopFlag) return;
+      const message = generateCommitMessage(file, 'Add');
+      await runGitCommand('git', ['add', file]);
       await runGitCommand('git', ['commit', '-m', message]);
    }
 };
@@ -92,7 +97,6 @@ export function activate(context: vscode.ExtensionContext) {
    });
 
    context.subscriptions.push(start, stop);
-
    vscode.commands.executeCommand('setContext', 'autoCommitMaster.active', false);
 }
 
