@@ -267,7 +267,13 @@ export function activate(context: vscode.ExtensionContext) {
    //     where ScmResourceState has `.resourceUri: Uri` (NOT `.fsPath`)
    // We therefore accept `...args: unknown[]` and walk the args looking for
    // any Uri or ScmResourceState — same pattern GitLens uses.
-   const isScmResourceState = (a: unknown): a is vscode.ScmResourceState =>
+   //
+   // `vscode.ScmResourceState` is not always exported by older @types/vscode
+   // versions, so we use a minimal structural type instead of depending on
+   // the namespace export.
+   type ScmResourceStateLike = { resourceUri: vscode.Uri };
+
+   const hasResourceUri = (a: unknown): a is ScmResourceStateLike =>
       !!a && typeof a === 'object' && 'resourceUri' in (a as object) && isUriLike((a as { resourceUri: unknown }).resourceUri);
 
    const isUriLike = (a: unknown): a is vscode.Uri =>
@@ -282,7 +288,7 @@ export function activate(context: vscode.ExtensionContext) {
             out.push(value);
             return;
          }
-         if (isScmResourceState(value)) {
+         if (hasResourceUri(value)) {
             out.push(value.resourceUri);
             return;
          }
@@ -305,9 +311,7 @@ export function activate(context: vscode.ExtensionContext) {
                if (a === undefined) return 'undefined';
                if (a instanceof vscode.Uri) return `Uri(${a.fsPath})`;
                if (Array.isArray(a)) return `Array(${a.length})`;
-               if (isScmResourceState(a)) {
-                  return `ScmResourceState(resourceUri=${(a as vscode.ScmResourceState).resourceUri.fsPath})`;
-               }
+               if (hasResourceUri(a)) return `ScmResourceState(resourceUri=${a.resourceUri.fsPath})`;
                if (typeof a === 'object') return `Object(${Object.keys(a as object).slice(0, 6).join(',')})`;
                return typeof a;
             })
