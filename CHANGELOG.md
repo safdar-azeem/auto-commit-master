@@ -8,6 +8,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ### Fixed
 
+- **Inline per-file commit button silently did nothing.** VS Code invokes commands contributed to `scm/resourceState/context` with two different arg shapes: the right-click context menu passes `(uri: Uri)`, but the inline group (`group: "inline"`) passes `(scmResourceState: ScmResourceState)`. The old code assumed the first arg was a `Uri`, so the inline-button path got an `ScmResourceState` object whose `fsPath` is `undefined`, and the commit silently no-op'd. The command now walks the args looking for either a `Uri` or a `ScmResourceState` and unwraps `state.resourceUri` when needed. A new diagnostic log line (`commitFile: arg shapes`) makes the shape VS Code actually passed obvious from the Output panel.
+
+### Added
+
+- **Inline commit-file button on every SCM row.** The `auto-commit-master.commitFile` command is now also contributed with `group: "inline"` to `scm/resourceState/context` and `scm/resourceFolder/context`, which puts a small `$(git-commit)` icon next to each file in the Source Control panel (Changes, Staged Changes, Merge Changes, etc.). One click → commit only that file, in the right repository, with correct per-file history. The right-click "Auto Commit Master: Commit File" entry remains as a fallback for keyboard / context-menu users.
+
+### Fixed
+
 - **Multi-project start button now commits only in the clicked repo.** The Start button in the SCM title bar appears once per repository in a multi-project workspace (e.g. `erp-new/erp-api`, `erp-new/erp-storage`, `erp-new/erp-web`). When invoked from one of those panels, VS Code passes the matching `SourceControl` instance to the command, and the extension now uses `SourceControl.rootUri` to scope the commit to that single repository. There is no picker — clicking the button next to `erp-api` only ever touches `erp-api`. A new `Auto Commit Master: Show Logs` command and `autoCommitMaster.verbose` setting make the per-step flow easy to inspect in the Output panel.
 - Per-repo progress notifications and stop-on-error handling retained for the now-single-repo path.
 
