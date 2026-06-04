@@ -14,7 +14,7 @@ export interface GitError extends Error {
 }
 
 const formatError = (args: string[], code: number | null, stderr: string, cwd?: string): GitError => {
-   const err: GitError = new Error(`git ${args.join(' ')} failed (exit ${code ?? 'n/a'}): ${stderr.trim()}`);
+   const err = new Error(`git ${args.join(' ')} failed (exit ${code ?? 'n/a'}): ${stderr.trim()}`) as GitError;
    err.code = code;
    err.stderr = stderr.trim();
    err.args = args;
