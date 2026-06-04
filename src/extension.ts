@@ -258,16 +258,67 @@ export function activate(context: vscode.ExtensionContext) {
    });
 
    // -- Single-file commit ----------------------------------------------------
+   // VS Code invokes this command with different arg shapes depending on
+   // which menu fires it:
+   //   - context menu (`scm/resourceState/context` group "commit")
+   //       → args = (uri: Uri[, uris: Uri[]])
+   //   - inline button (`scm/resourceState/context` group "inline")
+   //       → args = (scmResourceState: ScmResourceState)
+   //     where ScmResourceState has `.resourceUri: Uri` (NOT `.fsPath`)
+   // We therefore accept `...args: unknown[]` and walk the args looking for
+   // any Uri or ScmResourceState — same pattern GitLens uses.
+   const isScmResourceState = (a: unknown): a is vscode.ScmResourceState =>
+      !!a && typeof a === 'object' && 'resourceUri' in (a as object) && isUriLike((a as { resourceUri: unknown }).resourceUri);
+
+   const isUriLike = (a: unknown): a is vscode.Uri =>
+      a instanceof vscode.Uri ||
+      (!!a && typeof a === 'object' && typeof (a as { fsPath?: unknown }).fsPath === 'string');
+
+   const collectUrisFromArgs = (args: unknown[]): vscode.Uri[] => {
+      const out: vscode.Uri[] = [];
+      const visit = (value: unknown): void => {
+         if (value === null || value === undefined) return;
+         if (value instanceof vscode.Uri) {
+            out.push(value);
+            return;
+         }
+         if (isScmResourceState(value)) {
+            out.push(value.resourceUri);
+            return;
+         }
+         if (Array.isArray(value)) {
+            for (const item of value) visit(item);
+         }
+      };
+      for (const arg of args) visit(arg);
+      return out;
+   };
+
    const commitFile = vscode.commands.registerCommand(
       'auto-commit-master.commitFile',
-      async (uri?: vscode.Uri, uris?: vscode.Uri[]) => {
-         log('commitFile: command invoked', { hasUri: !!uri, uriCount: uris?.length ?? 0 });
+      async (...args: unknown[]) => {
+         log('commitFile: command invoked', { argCount: args.length });
+         log(
+            'commitFile: arg shapes',
+            args.map((a) => {
+               if (a === null) return 'null';
+               if (a === undefined) return 'undefined';
+               if (a instanceof vscode.Uri) return `Uri(${a.fsPath})`;
+               if (Array.isArray(a)) return `Array(${a.length})`;
+               if (isScmResourceState(a)) {
+                  return `ScmResourceState(resourceUri=${(a as vscode.ScmResourceState).resourceUri.fsPath})`;
+               }
+               if (typeof a === 'object') return `Object(${Object.keys(a as object).slice(0, 6).join(',')})`;
+               return typeof a;
+            })
+         );
          showLogs(true);
-         const targets: vscode.Uri[] =
-            Array.isArray(uris) && uris.length > 0 ? uris : uri ? [uri] : [];
+
+         const targets = collectUrisFromArgs(args);
+         log('commitFile: extracted targets', { count: targets.length, paths: targets.map((t) => t.fsPath) });
 
          if (targets.length === 0) {
-            logWarn('commitFile: no targets supplied');
+            logWarn('commitFile: no targets extracted from args');
             vscode.window.showInformationMessage('Select a file in the SCM view to commit.');
             return;
          }
