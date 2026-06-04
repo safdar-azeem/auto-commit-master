@@ -81,10 +81,20 @@
             {
                "command": "auto-commit-master.commitFile",
                "when": "scmProvider == git",
+               "group": "inline"
+            },
+            {
+               "command": "auto-commit-master.commitFile",
+               "when": "scmProvider == git",
                "group": "commit"
             }
          ],
          "scm/resourceFolder/context": [
+            {
+               "command": "auto-commit-master.commitFile",
+               "when": "scmProvider == git",
+               "group": "inline"
+            },
             {
                "command": "auto-commit-master.commitFile",
                "when": "scmProvider == git",
