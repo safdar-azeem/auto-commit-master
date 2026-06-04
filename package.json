@@ -2,8 +2,8 @@
    "name": "auto-commit-master",
    "displayName": "Auto Commit Master",
    "publisher": "SafdarAzeem",
-   "version": "0.0.4",
-   "description": "Generate commit messages automatically",
+   "version": "0.1.0",
+   "description": "Generate commit messages automatically — per-file or per-project, scoped to the active repository",
    "icon": "images/png/icon.png",
    "repository": "https://github.com/safdar-azeem/auto-commit-master",
    "engines": {
@@ -22,7 +22,9 @@
       "git",
       "scm"
    ],
-   "activationEvents": [],
+   "activationEvents": [
+      "*"
+   ],
    "main": "./dist/extension.js",
    "contributes": {
       "commands": [
@@ -41,8 +43,27 @@
                "dark": "images/svg/stop.svg",
                "light": "images/svg/stop-light.svg"
             }
+         },
+         {
+            "command": "auto-commit-master.commitFile",
+            "title": "Auto Commit Master: Commit File",
+            "icon": "$(git-commit)"
+         },
+         {
+            "command": "auto-commit-master.showLogs",
+            "title": "Auto Commit Master: Show Logs"
          }
       ],
+      "configuration": {
+         "title": "Auto Commit Master",
+         "properties": {
+            "autoCommitMaster.verbose": {
+               "type": "boolean",
+               "default": false,
+               "description": "Enable verbose debug logging (per-file / per-git-command detail). Open 'View → Output → Auto Commit Master' to see logs."
+            }
+         }
+      },
       "menus": {
          "scm/title": [
             {
@@ -54,6 +75,27 @@
                "command": "auto-commit-master.stop",
                "when": "scmProvider == git && autoCommitMaster.active",
                "group": "navigation"
+            }
+         ],
+         "scm/resourceState/context": [
+            {
+               "command": "auto-commit-master.commitFile",
+               "when": "scmProvider == git",
+               "group": "commit"
+            }
+         ],
+         "scm/resourceFolder/context": [
+            {
+               "command": "auto-commit-master.commitFile",
+               "when": "scmProvider == git",
+               "group": "commit"
+            }
+         ],
+         "editor/title/context": [
+            {
+               "command": "auto-commit-master.commitFile",
+               "when": "scmProvider == git",
+               "group": "commit"
             }
          ]
       }
