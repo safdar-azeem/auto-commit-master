@@ -6,6 +6,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [Unreleased]
 
+## [0.1.1]
+
+### Changed
+
+- **Output panel and console are silent for end users by default.** Both the auto-open of the "Auto Commit Master" Output panel (previously triggered on every Start / Commit-File invocation) and the `console.log` / `console.warn` / `console.error` mirror to the Extension Host console are now gated on the `autoCommitMaster.verbose` setting (default `false`). Logs continue to be appended to the Output channel silently, so opening **View → Output → Auto Commit Master** or running the **Show Logs** command still shows the full activity log — it just doesn't pop up uninvited. Developers should set `autoCommitMaster.verbose = true` to get the previous "panel auto-opens as I work" behaviour.
+
+## [0.1.0]
+
 ### Fixed
 
 - **Inline per-file commit button silently did nothing.** VS Code invokes commands contributed to `scm/resourceState/context` with two different arg shapes: the right-click context menu passes `(uri: Uri)`, but the inline group (`group: "inline"`) passes `(scmResourceState: ScmResourceState)`. The old code assumed the first arg was a `Uri`, so the inline-button path got an `ScmResourceState` object whose `fsPath` is `undefined`, and the commit silently no-op'd. The command now walks the args looking for either a `Uri` or a `ScmResourceState` and unwraps `state.resourceUri` when needed. A new diagnostic log line (`commitFile: arg shapes`) makes the shape VS Code actually passed obvious from the Output panel.
