@@ -6,7 +6,7 @@ import { checkGitStatus } from './helpers/checkGitStatus';
 import { generateCommitMessage } from './helpers/generateCommitMessage';
 import { findGitFolders, GitFolder } from './helpers/checkGitFolders';
 import { commitSingleFile, findRepoRoot } from './helpers/commitSingleFile';
-import { debug, error as logError, initLogger, log, setVerbose, show as showLogs, warn as logWarn } from './helpers/logger';
+import { debug, error as logError, initLogger, isVerbose, log, setVerbose, show as showLogs, warn as logWarn } from './helpers/logger';
 
 let stopFlag = false;
 
@@ -130,7 +130,7 @@ export function activate(context: vscode.ExtensionContext) {
    const start = vscode.commands.registerCommand('auto-commit-master.start', async (...args: unknown[]) => {
       log('start: command invoked');
       log('start: raw args', args.map((a) => (a === null ? 'null' : typeof a === 'object' ? Object.keys(a as object) : typeof a)));
-      showLogs(true);
+      if (isVerbose()) showLogs(true);
 
       // Resolve the target repo with this priority:
       //   1. SourceControl passed by VS Code when invoked from an SCM title
@@ -316,7 +316,7 @@ export function activate(context: vscode.ExtensionContext) {
                return typeof a;
             })
          );
-         showLogs(true);
+         if (isVerbose()) showLogs(true);
 
          const targets = collectUrisFromArgs(args);
          log('commitFile: extracted targets', { count: targets.length, paths: targets.map((t) => t.fsPath) });
