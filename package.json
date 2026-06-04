@@ -20,7 +20,26 @@
       "Auto Commit Message",
       "Autocomplete",
       "git",
-      "scm"
+      "scm",
+      "version control",
+      "source control",
+      "git commit",
+      "commit message",
+      "git automation",
+      "git auto commit",
+      "automate",
+      "automation",
+      "one click commit",
+      "single file commit",
+      "per-file commit",
+      "bulk commit",
+      "batch commit",
+      "fast commit",
+      "instant commit",
+      "git workflow",
+      "workspace",
+      "productivity",
+      "developer tools"
    ],
    "activationEvents": [
       "*"
