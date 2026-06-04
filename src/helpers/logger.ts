@@ -32,19 +32,27 @@ const formatLine = (level: string, args: unknown[]): string => {
 
 const write = (level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG', args: unknown[]): void => {
    const line = formatLine(level, args);
-   switch (level) {
-      case 'WARN':
-         console.warn(line);
-         break;
-      case 'ERROR':
-         console.error(line);
-         break;
-      case 'DEBUG':
-         console.debug(line);
-         break;
-      default:
-         console.log(line);
+   // Only mirror to the Extension Host console (DevTools) when verbose mode
+   // is on. End users never see the console anyway, but this keeps the
+   // developer/dev path clean and silent for production installs.
+   if (verbose) {
+      switch (level) {
+         case 'WARN':
+            console.warn(line);
+            break;
+         case 'ERROR':
+            console.error(line);
+            break;
+         case 'DEBUG':
+            console.debug(line);
+            break;
+         default:
+            console.log(line);
+      }
    }
+   // Always append to the OutputChannel — it's silent until the user
+   // manually opens the "Auto Commit Master" Output panel or runs the
+   // "Show Logs" command, so end users are never bothered.
    if (channel) {
       channel.appendLine(line);
    }
